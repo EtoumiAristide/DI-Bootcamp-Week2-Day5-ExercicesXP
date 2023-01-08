@@ -1,7 +1,36 @@
-*{
+* {
     font-family: 'PT Sans', sans-serif;
 }
 
-body{
-    padding: 50px
+body {
+    background-image: url("../img/bg.webp");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    padding: 50px;
+    background-color: black;
+    /* color: white; */
+}
+
+/* .button{
+    background-color: orangered;
+    color: white;
+    height: 50px;
+    border: none;
+    width: 200px;
+    font-weight: bold;
+} */
+
+.game-title {
+    color: white;
+    margin-bottom: 20px;
+}
+
+.btn-launch-game {
+    background-color: orangered;
+    color: white;
+    height: 50px;
+    border: none;
+    width: 200px;
+    font-weight: bold;
 }

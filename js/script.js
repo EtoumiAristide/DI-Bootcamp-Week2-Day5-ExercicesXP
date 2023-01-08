@@ -3,33 +3,29 @@
  * @description DI-Bootcamp Week2 Day1 ExercicesXP:Play A Guessing Game
  */
 
-// PARTIE 1
+let userInputNumber;  //Le nombre saisi par l'utilisateur
+let compteurTour = 0; //Le compteur de nombre d'essai du jeu
+let computerNumber; //Le nombre généré aleatoirement
+let panelErreur = document.getElementById("panelErreur"); //Le panneau d'affichage des erreurs
+let inputUserData = document.getElementById("inputData"); //Le champs de saisie du nombre
 
-//3-In the JS file, create a function called playTheGame() that takes no parameter.
-let userInputNumber;
-let compteurTour = 0;
+//Le modal principal du jeu
+let modalFormulaire = new bootstrap.Modal(document.getElementById('modalForm'), { keyboard: false });
+//Le modal affiché lors de la fin du jeu
+let modalEndGame = new bootstrap.Modal(document.getElementById('modalEndGame'), { keyboard: false });
+//Le message affiché à la fin du jeu
+let endGameMessage = document.getElementById("endGameMessage");
+
 function playTheGame() {
-    //3-1- In the function, start by asking the user if they would like to play the game 
-    let answer = confirm("Voulez-vous jouer au jeu ?");
-    if (answer == false) {
-        //3-1-1: If the answer is false, alert “No problem, Goodbye”.
-        alert("Aucun problème, Au revoir.")
-    } else {
-        //3-1-2:If his answer is true, follow these steps
+    userInputNumber = inputUserData.value;
 
-        //3-1-2-1: Ask the user to enter a number between 0 and 10
-        //You then have to check the validity of the user’s number :
-        //userInputNumber = prompt("Entrer un nombre en 0 et 10.");
-        //if (checkNumberValidity(userInputNumber, true)) {
-        checkNumberValidityBonus();
-        //create a variable named computerNumber where the value is a random number between 0 and 10
-        //Make sure that the number is rounded.
-        let computerNumber = Math.round(Math.random() * 10);
-        console.log("computerNumber: " + computerNumber);
+    if (checkNumberValidity(userInputNumber, true)) {
+        if (compteurTour == 0) { //On génère seulement en cas d'un nouveau jeu
+            computerNumber = Math.round(Math.random() * 10);
+            console.log("computerNumber: " + computerNumber);
+        }
 
         compareNumbers(Math.round(parseFloat(userInputNumber)), computerNumber);
-
-        //}
 
     }
 }
@@ -42,59 +38,67 @@ function playTheGame() {
  * @returns true si tout est correcte et false sinon
  */
 function checkNumberValidity(userInputNumber, alertRetour) {
+    //console.log(userInputNumber);
     if (userInputNumber != null) {
-        //If the user didn’t enter a number (ie. if he entered another data type) alert “Sorry Not a number, Goodbye”.
-        if (isNaN(userInputNumber)) {
-            if (alertRetour) alert("Désolé, ce n'est pas un nombre, Au revoir.")
+        if (isNaN(userInputNumber) || userInputNumber.trim() == '') {
+            if (alertRetour) createAlert("alert-danger", "Désolé, ce n'est pas un nombre.");
         } else if (parseFloat(userInputNumber) < 0 || parseFloat(userInputNumber) > 10) {
-            //If the user didn’t enter a number between 0 and 10 alert “Sorry it’s not a good number, Goodbye”.
-            if (alertRetour) alert("Désolé, le nombre est incorrecte, Au revoir.")
+            if (alertRetour) createAlert("alert-danger", "Désolé, le nombre est incorrecte.");
         } else {
+            createAlert("", "");
             return true;
         }
     }
     return false;
 }
 
-function checkNumberValidityBonus() {
-    do {
-        userInputNumber = prompt("Entrer un nombre entre 0 et 10");
-
-    } while (!checkNumberValidity(userInputNumber, false));
-}
-
-// Partie 2
-
-//Outside of the playTheGame() function, create a new function named compareNumbers(userNumber,computerNumber) 
-//2- that takes 2 parameters : userNumber and computerNumber
 /**
- * Check if the userNumber is the same as the computeNumber
+ * Verifie si le nombre entré est égale à celui généré par l'ordinateur
  * @param userNumber 
  * @param computerNumber 
  */
 function compareNumbers(userNumber, computerNumber) {
     compteurTour++;
-    console.log("compteurTour " + compteurTour);
-    //2-1: If userNumber is equal to computerNumber, alert “WINNER” and stop the game.
-    if (userNumber == computerNumber) {
-        alert("GAGNÉ");
-        compteurTour = 0;
-    } else if (compteurTour == 3) {
-        //II-4: If the user guessed more than 3 times, alert “out of chances” and exit the function.
-        alert("Nombre d'essai dépassé!");
-        compteurTour = 0;
+    if (userNumber === computerNumber) {
+        createAlert("alert-success", 'Bravo vous avez gagné!', true)
+        endGame()
+    } else if (compteurTour > 2) {
+        createAlert("alert-danger", 'Nombre d\'essai dépassé! <br>Le nombre était ' + computerNumber, true)
+        endGame();
     } else if (userNumber > computerNumber) {
-        //2-2: If userNumber is bigger than computerNumber, alert “Your number is bigger then the computer’s, guess again”
-        userInputNumber = prompt("Votre nombre est plus grand que celui généré par l'ordinateur, \nVeuillez recommencer svp!");
-        if (checkNumberValidity(userInputNumber, true)) {
-            compareNumbers(userInputNumber, computerNumber);
-        }
+        createAlert("alert-danger", "Votre nombre est plus grand que celui généré par l'ordinateur, <br>Il vous reste " + (3 - compteurTour) + " éssais, veuillez recommencer svp!", false)
     } else {
-        //2-3: If userNumber is lower than computerNumber, alert “Your number is lower then the computer’s, guess again”
-        userInputNumber = prompt("Votre nombre est plus petit que celui généré par l'ordinateur, \nVeuillez recommencer svp!")
-        if (checkNumberValidity(userInputNumber, true)) {
-            compareNumbers(userInputNumber, computerNumber);
-        }
+        createAlert("alert-danger", "Votre nombre est plus petit que celui généré par l'ordinateur, <br>" + (3 - compteurTour) + " éssais, veuillez recommencer svp!", false)
     }
+}
 
+/**
+ * Effectue les opérations de nettoyage et d'affichage de composants nécessaire 
+ * lorsque le jeu est terminé
+ */
+function endGame() {
+    compteurTour = 0; //On reinitialise le compteur pour le jeu suivant
+    modalFormulaire.hide();
+    panelErreur.innerHTML = "";
+    inputUserData.value = "";
+    modalEndGame.show();
+}
+
+/**
+ * Crée une alerte de type bootstap et l'ajoute à un conteneur
+ * en fonction de isEndGame
+ * @param alertType 
+ * @param message 
+ * @param isEndGame 
+ */
+function createAlert(alertType, message, isEndGame) {
+    panelErreur.innerHTML = "";
+    endGameMessage.innerHTML = "";
+    if (alertType.trim() != '' && message.trim() != '') {
+        let alert = document.createElement("div");
+        alert.classList.add("alert", alertType);
+        alert.setAttribute("role", "alert")
+        alert.innerHTML = message;
+        isEndGame ? endGameMessage.appendChild(alert) : panelErreur.appendChild(alert);
+    }
 }
